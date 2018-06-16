@@ -1,0 +1,2 @@
+python-dateutil==2.6.1
+slackclient==1.2.1
