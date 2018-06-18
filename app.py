@@ -39,7 +39,7 @@ def parse_direct_mention(message_text):
     # the first group contains the username, the second group contains the remaining message
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
-def handle_command(command=None, channel=None, sender=None, remind=False):
+def handle_command(command='', channel=None, sender=None, remind=False):
     
     global STUCK_OUTSIDE
     #for unknown commands
