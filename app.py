@@ -40,7 +40,8 @@ def parse_direct_mention(message_text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 def handle_command(command=None, channel=None, sender=None, remind=False):
-
+    
+    global STUCK_OUTSIDE
     #for unknown commands
     default_response = ("""IDGI. :( Try any of these: \n
             \'@doorbelle ring\' or \'@doorbelle let me in\' to be let in, \n
@@ -55,18 +56,28 @@ def handle_command(command=None, channel=None, sender=None, remind=False):
         response = '<!channel> let <@{}> in!'.format(sender)
 
     else:
-        if command.startswith('ring') or command.startswith('let me in'):
+        if command.lower().startswith('ring') or command.startswith('let me in'):
             response = 'Got it, <@{}>! I\'ll annoy everyone until you\'re let in. >:)'.format(sender)
             print ("added user {} to stuck users".format(sender))
             STUCK_OUTSIDE[sender] = datetime.datetime.now()
 
-        if command.startswith('stop'):
+        elif command.lower().startswith('stop'):
             response = 'Yay, <@{}>! Glad they let you in.'.format(sender)
             if sender in STUCK_OUTSIDE.keys():
                 STUCK_OUTSIDE.pop(sender)
                 print ("removed {} from stuck users".format(sender))
             else:
                 response = 'Hey, you never asked to be let in. Rude.'
+        
+        elif command.lower().startswith('ding'):
+            response = 'DONG!'
+   
+        elif command.lower().startswith('got it'):
+            response = 'Noted, <@{}>!'.format(sender)
+            STUCK_OUTSIDE = defaultdict()
+        
+        elif command.lower().startswith('i love you'):
+            response = 'I love you too, <@{}>! <3'.format(sender)
 
     # responds in either the channel where the message was sent or in the default bot channel
     slack_client.api_call(
@@ -95,7 +106,7 @@ if __name__ == "__main__":
                 if t_diff[0] == 10:
                     print ('suspending pings for user {}'.format(user))
                     STUCK_OUTSIDE.pop(user)
-                elif t_diff[1] == 0 or t_diff[1] == 30:
+                elif t_diff[1] == 0:
                     print ('pinging for user {}'.format(user))
                     handle_command(sender=user, remind=True)
             time.sleep(RTM_READ_DELAY)
